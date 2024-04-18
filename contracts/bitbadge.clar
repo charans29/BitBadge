@@ -1,4 +1,4 @@
-(impl-trait 'ST3QFME3CANQFQNR86TYVKQYCFT7QX4PRXM1V9W6H.sip009-nft-trait.sip009-nft-trait)
+(impl-trait 'STVYYHBYCS1825Q95NYZ5YP8W64NRN7Z72ZPVR4X.sbtc-nft-trait.sip009-nft-trait)
 
 (define-constant contract-owner tx-sender)
 (define-constant err-owner-only (err u100))
@@ -36,7 +36,7 @@
     (let
         (
             (token-id (+ (var-get last-token-id) u1))
-            (tx-was-mined (try! (contract-call? 'ST3QFME3CANQFQNR86TYVKQYCFT7QX4PRXM1V9W6H.clarity-bitcoin-bitbadge-v3 was-tx-mined-compact height tx header proof)))
+            (tx-was-mined (try! (contract-call? 'STVYYHBYCS1825Q95NYZ5YP8W64NRN7Z72ZPVR4X.clarity-bitcoin-bitbadge-v3 was-tx-mined-compact height tx header proof)))
         )
         (asserts! (is-eq tx-sender contract-owner) err-owner-only)
         (asserts! (is-eq tx-was-mined true) err-tx-not-mined)

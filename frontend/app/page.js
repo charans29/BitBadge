@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -20,19 +21,27 @@ import { Transaction } from "bitcoinjs-lib";
 
 export default function Home() {
   const [userData, setUserData] = useState({});
+  // const [blockDetails, setBlockDetails] = useState(() => {
+  //   if (typeof window !== 'undefined') {
+  //     const storedBlockDetails = localStorage.getItem("blockDetails");
+  //     return storedBlockDetails ? JSON.parse(storedBlockDetails) : {};
+  //   }
+  //   return {};
+  // });
+
   const [blockDetails, setBlockDetails] = useState({});
 
+  useEffect(() => {
+    // Access localStorage only when component is mounted on the client side
+    const storedBlockDetails = localStorage.getItem("blockDetails");
+    if (storedBlockDetails) {
+      setBlockDetails(JSON.parse(storedBlockDetails));
+    }
+  }, []);
 
 
   const appConfig = new AppConfig();
   const userSession = new UserSession({ appConfig });
-
-  useEffect(() => {
-    const storedBlockDetails = typeof window !== 'undefined' ? localStorage.getItem("blockDetails") : null;
-    if (storedBlockDetails) {
-        setBlockDetails(JSON.parse(storedBlockDetails));
-    }
-}, []);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -41,10 +50,8 @@ export default function Home() {
         fetch(`https://blockstream.info/testnet/api/tx/${txid}/status`)
           .then((response) => response.json())
           .then(async (status) => {
-            // set txStatus in localStorage if it is confirmed, otherwise we want to leave it pending
             if (status.confirmed) {
               localStorage.setItem("txStatus", "confirmed");
-              // set the block details
               const blockDetails = {
                 block_height: status.block_height,
                 block_hash: status.block_hash,
@@ -110,14 +117,13 @@ export default function Home() {
     setUserData({});
   };
 
-  // This function sends a Bitcoin transaction and stores the raw transaction and merkle proof in localStorage
+  // This function sends a Bitcoin transaction and stores the txid in localStorage
   const reserveBitbadge = async () => {
     const resp = await window.btc?.request("sendTransfer", {
       address: "tb1qya9wtp4dyq67ldxz2pyuz40esvgd0cgx9s3pjl",
       amount: "100",
       network: "testnet"
     });
-
     // Storing txid in local storage
     if (typeof window !== "undefined") {
       localStorage.setItem("txid", JSON.stringify(resp.result.txid));
@@ -194,7 +200,7 @@ export default function Home() {
     ];
 
     const contractAddress = "STVYYHBYCS1825Q95NYZ5YP8W64NRN7Z72ZPVR4X"; // Replace with your contract address
-    const contractName = "bitbadge"; // Replace with your contract name
+    const contractName = "bitbadge-v3"; // Replace with your contract name
     const functionName = "mint"; // Replace with your function name
 
     const options = {
@@ -255,17 +261,13 @@ export default function Home() {
           {(() => {
             const buttonState = getButtonState();
             return (
-              <>
-                <p className="text-xl text-white">{buttonState.instructions}</p>
-                <button
-                  className="px-4 py-2 mt-4 text-lg font-bold text-white bg-indigo-600 rounded hover:bg-indigo-500"
-                  onClick={buttonState.onClick}
-                  disabled={buttonState.disabled}
-                >
-                  {buttonState.text}
-                  {buttonState.disabled && <span className="spinner"></span>}
-                </button>
-              </>
+              <button
+                className="px-4 py-2 mt-4 text-lg font-bold text-white bg-indigo-600 rounded hover:bg-indigo-500"
+                onClick={buttonState.onClick}
+                disabled={buttonState.disabled}
+              >
+                {buttonState.text}
+              </button>
             );
           })()}
           <button
